@@ -11,7 +11,7 @@ const NodePanel: FunctionComponent<Props> = ({}) => {
     event.dataTransfer.effectAllowed = "move";
   };
   return (
-    <div className="border-l border-gray-500 h-full p-4">
+    <div className="border-l border-gray-300 h-full p-4">
       <div className="grid grid-cols-2 gap-4">
         <NodePanelBox
           text="Message"

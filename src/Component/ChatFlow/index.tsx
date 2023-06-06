@@ -25,6 +25,7 @@ const BasicFlow = () => {
     onConnect,
     onDragOver,
     onDrop,
+    onSelectionChange,
   } = useChatFlow();
   return (
     <div className="h-full">
@@ -42,6 +43,7 @@ const BasicFlow = () => {
               onInit={setReactFlowInstance}
               onDrop={onDrop}
               onDragOver={onDragOver}
+              onSelectionChange={onSelectionChange}
               fitView
             >
               <Background />
