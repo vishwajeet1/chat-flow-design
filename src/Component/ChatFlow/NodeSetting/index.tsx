@@ -1,7 +1,9 @@
 import { FunctionComponent } from "react";
-import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import { Node } from "reactflow";
 import InputNodeSetting from "Component/ChatFlow/NodeSetting/InputNodeSetting";
+import { NodeTypeEnum } from "Component/ChatFlow/chatFlowInterface";
+import { nodeSettingTitleConstant } from "Component/ChatFlow/constant";
+import NodeSettingHeader from "Component/ChatFlow/NodeSetting/NodeSettingHeader";
 
 interface Props {
   selectedNode: Node;
@@ -16,17 +18,16 @@ const NodeSetting: FunctionComponent<Props> = ({
 }) => {
   return (
     <div>
-      <div
-        className="flex justify-start gap-4 border-b border-gray-300 text-gray-500 font-bold py-2"
-        onClick={() => setSelectedNode(null)}
-      >
-        <div>
-          <ArrowBackIcon />
-        </div>
-        <div className="self-center">Message</div>
-      </div>
+      <NodeSettingHeader
+        onClick={() => {
+          setSelectedNode(null);
+        }}
+        title={nodeSettingTitleConstant[selectedNode.type as NodeTypeEnum]}
+      />
       <div className="py-4">
-        <InputNodeSetting selectedNode={selectedNode} setNodes={setNodes} />
+        {selectedNode.type === NodeTypeEnum.MESSAGE && (
+          <InputNodeSetting selectedNode={selectedNode} setNodes={setNodes} />
+        )}
       </div>
     </div>
   );

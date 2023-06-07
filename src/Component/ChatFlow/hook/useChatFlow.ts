@@ -5,10 +5,8 @@ import {
   Edge,
   Node,
   OnSelectionChangeParams,
-  ReactFlowState,
   useEdgesState,
   useNodesState,
-  useOnSelectionChange,
   useReactFlow,
   getConnectedEdges,
 } from "reactflow";
@@ -17,6 +15,7 @@ import {
   initialEdges,
   initialNodes,
   flowKey,
+  dragAndDropKey,
 } from "Component/ChatFlow/constant";
 import useAlertMessage from "Component/ChatFlow/hook/useAlertMessage";
 import debounce from "lodash/debounce";
@@ -35,10 +34,11 @@ const useChatFlow = () => {
     [setEdges]
   );
 
-  const throttleOnAlertMessage = debounce(alertMessage, 1000);
+  const debounceOnAlertMessage = debounce(alertMessage, 1000);
 
   const onDragOver = useCallback((event: any) => {
     event.preventDefault();
+    // set the drop effect
     event.dataTransfer.dropEffect = "move";
   }, []);
 
@@ -46,24 +46,30 @@ const useChatFlow = () => {
     (event: any) => {
       event.preventDefault();
 
+      // get the React flow bounds
       const reactFlowBounds = reactFlowWrapper.current.getBoundingClientRect();
-      const type = event.dataTransfer.getData("application/reactflow");
 
+      // get the type of the dropped element
+      const type = event.dataTransfer.getData(dragAndDropKey);
       // check if the dropped element is valid
       if (typeof type === "undefined" || !type) {
         return;
       }
-
+      // get position of the dropped element
       const position = reactFlowInstance.project({
         x: event.clientX - reactFlowBounds.left,
         y: event.clientY - reactFlowBounds.top,
       });
+
+      // create a new node
       const newNode: Node = {
         id: uuidv4(),
         type,
         position,
         data: { label: `text message...` },
       };
+
+      // add the new node to the nodes array
       setNodes((nds) => nds.concat(newNode));
     },
     [reactFlowInstance]
@@ -71,6 +77,9 @@ const useChatFlow = () => {
 
   const onSelectionChange = useCallback(
     (params: OnSelectionChangeParams) => {
+      // if there is a node selected then set the selected node
+      // else set the selected node to null
+      // multiple selection is not covered
       if (params?.nodes?.length > 0) {
         setSelectedNode(params?.nodes?.[0]);
       } else {
@@ -82,14 +91,20 @@ const useChatFlow = () => {
 
   const handleEdgeValidation = useCallback(
     (connection: Connection) => {
+      // check if the source node is already connected to another node
       const sourceConnection = connection.source && getNode(connection.source);
+
+      // if sourceConnection is null then return false
       if (!sourceConnection) return false;
+
+      // get all the edges connected to the source node
       const edges = getConnectedEdges([sourceConnection], getEdges());
-      console.log("edges", edges, connection);
+
+      // check if the source node is already connected to another node
       for (let i = 0; i < edges.length; i++) {
         if (edges[i].source === connection.source) {
           console.log("handle already used");
-          throttleOnAlertMessage("Multiple source are not allowed", "error");
+          debounceOnAlertMessage("Multiple source are not allowed", "error");
           return false;
         }
       }
@@ -100,27 +115,31 @@ const useChatFlow = () => {
 
   const saveFlow = useCallback(() => {
     if (reactFlowInstance) {
+      // check if the flow is valid
       if (saveValidation()) {
         const flow = reactFlowInstance.toObject();
+        // save the flow to local storage
         localStorage.setItem(flowKey, JSON.stringify(flow));
-        throttleOnAlertMessage("Successfully Saved", "success");
+        debounceOnAlertMessage("Successfully Saved", "success");
       } else {
-        throttleOnAlertMessage("Please check your flow", "error");
+        debounceOnAlertMessage("Please check your flow", "error");
       }
     }
   }, [reactFlowInstance, nodes, edges]);
 
   useEffect(() => {
+    // restore the flow from local storage on component mount
     onRestore();
   }, []);
 
   const saveValidation = (): boolean => {
+    // check if all the nodes are connected
     if (nodes) {
       const nodesWithNoEdges = nodes.filter(
         (node: Node) => !getConnectedEdges([node], edges).length
       );
       if (nodesWithNoEdges.length > 0) {
-        throttleOnAlertMessage("Please connect all nodes", "error");
+        debounceOnAlertMessage("Please connect all nodes", "error");
         return false;
       }
     }
@@ -128,11 +147,12 @@ const useChatFlow = () => {
   };
 
   const onRestore = useCallback(() => {
+    // restore the flow from local storage
     const restoreFlow = async () => {
       const data = localStorage.getItem(flowKey);
       if (data === null) return;
       const flow = JSON.parse(data);
-
+      // set the flow to react flow
       if (flow) {
         const { x = 0, y = 0, zoom = 1 } = flow.viewport;
         setNodes(flow.nodes || []);

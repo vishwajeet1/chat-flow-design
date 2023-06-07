@@ -26,3 +26,9 @@ export const nodePanelList: {
 export const nodeTypes = {
   [NodeTypeEnum.MESSAGE]: TextMessageNode,
 };
+
+export const dragAndDropKey = "application/react-flow";
+
+export const nodeSettingTitleConstant: Record<NodeTypeEnum, string> = {
+  [NodeTypeEnum.MESSAGE]: "Message",
+};

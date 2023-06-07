@@ -27,7 +27,7 @@ const BasicFlow = () => {
   return (
     <div className="h-full">
       <Navbar
-        onClick={() => {
+        onSave={() => {
           saveFlow();
         }}
       />
