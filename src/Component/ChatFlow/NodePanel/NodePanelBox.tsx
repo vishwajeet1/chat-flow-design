@@ -19,7 +19,7 @@ const NodePanelBox: FunctionComponent<Props> = ({
     <div
       onDragStart={(event) => onDragStart(event, nodeType)}
       draggable
-      className="border border-gray-400 cursor-move rounded-lg text-gray-600 py-2"
+      className="border border-gray-400 cursor-move rounded-lg text-gray-600 py-2 px-4"
     >
       <div>{icon}</div>
       <div>{text}</div>
