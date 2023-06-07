@@ -25,7 +25,7 @@
 
 ## Demo
 
-![](./demo/sample.gif)
+![](./demo/sample.webp)
 
 ## Reference
 - [React](https://reactjs.org/)
